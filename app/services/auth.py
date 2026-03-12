@@ -86,10 +86,9 @@ async def store_refresh_token(
 async def revoke_refresh_token(db: AsyncSession, token: str) -> bool:
     """Revoke a refresh token. Returns True if found and revoked."""
     result = await db.execute(
-        select(RefreshToken).where(
-            RefreshToken.token == token,
-            RefreshToken.revoked.is_(False),
-        )
+        select(RefreshToken)
+        .where(RefreshToken.token == token)
+        .where(RefreshToken.revoked.is_(False))
     )
     db_token = result.scalar_one_or_none()
     if db_token is None:
@@ -102,10 +101,9 @@ async def revoke_refresh_token(db: AsyncSession, token: str) -> bool:
 async def validate_refresh_token(db: AsyncSession, token: str) -> RefreshToken | None:
     """Validate a refresh token exists, is not revoked, and not expired."""
     result = await db.execute(
-        select(RefreshToken).where(
-            RefreshToken.token == token,
-            RefreshToken.revoked.is_(False),
-        )
+        select(RefreshToken)
+        .where(RefreshToken.token == token)
+        .where(RefreshToken.revoked.is_(False))
     )
     db_token = result.scalar_one_or_none()
     if db_token is None:

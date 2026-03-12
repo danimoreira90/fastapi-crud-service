@@ -40,9 +40,7 @@ class Settings(BaseSettings):
     @property
     def database_url_sync(self) -> str:
         """Synchronous URL for Alembic migrations."""
-        return self.database_url.replace("+asyncpg", "+psycopg2").replace(
-            "+aiosqlite", ""
-        )
+        return self.database_url.replace("+asyncpg", "+psycopg2").replace("+aiosqlite", "")
 
 
 settings = Settings()

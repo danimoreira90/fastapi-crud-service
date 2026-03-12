@@ -80,9 +80,7 @@ class TestGetUser:
 
     async def test_get_user_not_found(self, client: AsyncClient) -> None:
         _, headers, _ = await create_user_and_login(client)
-        response = await client.get(
-            "/api/v1/users/nonexistent-id-12345", headers=headers
-        )
+        response = await client.get("/api/v1/users/nonexistent-id-12345", headers=headers)
         assert response.status_code == 404
 
 

@@ -36,9 +36,7 @@ class TestJWTTokens:
 
     def test_create_access_token(self) -> None:
         token = create_access_token("user-123")
-        payload = jwt.decode(
-            token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]
-        )
+        payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
         assert payload["sub"] == "user-123"
         assert payload["type"] == "access"
         assert "jti" in payload
@@ -46,9 +44,7 @@ class TestJWTTokens:
 
     def test_create_refresh_token(self) -> None:
         token, expires_at = create_refresh_token("user-456")
-        payload = jwt.decode(
-            token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]
-        )
+        payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
         assert payload["sub"] == "user-456"
         assert payload["type"] == "refresh"
         assert "jti" in payload

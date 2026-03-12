@@ -18,7 +18,9 @@ class UserUpdate(BaseModel):
     """Schema for updating an existing user. All fields optional."""
 
     email: EmailStr | None = None
-    username: str | None = Field(default=None, min_length=3, max_length=100, pattern=r"^[a-zA-Z0-9_-]+$")
+    username: str | None = Field(
+        default=None, min_length=3, max_length=100, pattern=r"^[a-zA-Z0-9_-]+$"
+    )
     full_name: str | None = Field(default=None, max_length=255)
     is_active: bool | None = None
 

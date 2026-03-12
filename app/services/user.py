@@ -53,10 +53,7 @@ async def list_users(
     # Fetch page
     offset = (page - 1) * per_page
     result = await db.execute(
-        select(User)
-        .order_by(User.created_at.desc())
-        .offset(offset)
-        .limit(per_page)
+        select(User).order_by(User.created_at.desc()).offset(offset).limit(per_page)
     )
     users = list(result.scalars().all())
     return users, total
