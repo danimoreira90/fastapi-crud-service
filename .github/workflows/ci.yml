@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  PYTHON_VERSION: "3.11"
+
+jobs:
+  lint:
+    name: Lint (Ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install ruff
+
+      - name: Run ruff check
+        run: ruff check app/ tests/
+
+      - name: Run ruff format check
+        run: ruff format --check app/ tests/
+
+  typecheck:
+    name: Type Check (mypy)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install ".[dev]"
+
+      - name: Run mypy
+        run: mypy app/ --ignore-missing-imports
+
+  test:
+    name: Test (pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install dependencies
+        run: pip install ".[dev]"
+
+      - name: Run tests with coverage
+        env:
+          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
+          JWT_SECRET_KEY: "ci-test-secret-key-not-for-production"
+          APP_ENV: test
+        run: |
+          pytest -v --tb=short
+          coverage run -m pytest
+          coverage report --fail-under=80
+
+  build:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, test]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t fastapi-crud-service:ci .
+
+      - name: Verify image runs
+        run: |
+          docker run -d --name test-app \
+            -e DATABASE_URL=sqlite+aiosqlite:///test.db \
+            -e JWT_SECRET_KEY=ci-test-key \
+            -p 8000:8000 \
+            fastapi-crud-service:ci
+          sleep 5
+          curl -f http://localhost:8000/health || exit 1
+          docker stop test-app
