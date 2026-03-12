@@ -88,6 +88,9 @@ jobs:
             -e JWT_SECRET_KEY=ci-test-key \
             -p 8000:8000 \
             fastapi-crud-service:ci
-          sleep 5
-          curl -f http://localhost:8000/health || exit 1
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:8000/health && break
+            [ $i -eq 15 ] && { docker logs test-app; exit 1; }
+            sleep 1
+          done
           docker stop test-app
